@@ -1,0 +1,5 @@
+c:\users\dylan\documents\visual studio 2015\Projects\PSDcreator\PSDcreator\bin\Debug\PSDcreator.dll
+c:\users\dylan\documents\visual studio 2015\Projects\PSDcreator\PSDcreator\bin\Debug\PSDcreator.pdb
+c:\users\dylan\documents\visual studio 2015\Projects\PSDcreator\PSDcreator\obj\Debug\PSDcreator.csprojResolveAssemblyReference.cache
+c:\users\dylan\documents\visual studio 2015\Projects\PSDcreator\PSDcreator\obj\Debug\PSDcreator.dll
+c:\users\dylan\documents\visual studio 2015\Projects\PSDcreator\PSDcreator\obj\Debug\PSDcreator.pdb
