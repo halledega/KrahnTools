@@ -67,16 +67,15 @@ namespace PSDcreator
             Application app = uiapp.Application;
             Document doc = uidoc.Document;
 
-
+            //check to see if the PSD titleblock is in the current document.
             FilteredElementCollector titleblockCollector = new FilteredElementCollector(doc).OfClass(typeof(Family));
             Family family = titleblockCollector.FirstOrDefault<Element>(e => e.Name.Equals("Titleblock - 11 x 17_Krahn Engineering - PSD")) as Family;
             string FamilyPath = @"C:\ProgramData\Autodesk\Revit\Addins\2016\PSDcreator\Titleblock - 11 x 17_Krahn Engineering - PSD.rfa";
 
+            //if the titleblock doesn't exist in the current document, it is imported.
             if (null == family)
             {
-                // It is not present, so check for 
-                // the file to load it from:
-
+                // It is not present, so check for the file to load it from:
                 if (!File.Exists(FamilyPath))
                 {
                    TaskDialog.Show("Error", "The PSD Template is missing from the addins folder.");
@@ -85,12 +84,23 @@ namespace PSDcreator
 
                 using (Transaction t = new Transaction(doc))
                 {
-                    t.Start("Load Family");
+                    t.Start("Load Titleblock");
                     doc.LoadFamily(FamilyPath, out family);
                     t.Commit();
                 }
             }
 
+            //makes sure the correct view templates have been created in the project.
+            FilteredElementCollector viewTemplateCollector = new FilteredElementCollector(doc).OfClass(typeof(View));
+            View embedtitleblock = viewTemplateCollector.FirstOrDefault<Element>(e => e.Name.Equals("PSD_EMBEDS")) as View;
+            View rebartitleblock = viewTemplateCollector.FirstOrDefault<Element>(e => e.Name.Equals("PSD_REBAR")) as View;
+
+            //if they don't exist in the project, warning is shown and application is terminated
+            if ((embedtitleblock == null || rebartitleblock == null))
+            {
+                TaskDialog.Show("Error", "You are missing the required PSD view templates, please add them to continue");
+                return Result.Failed;
+            }
 
             while (true)
             {
@@ -113,7 +123,7 @@ namespace PSDcreator
                 }
 
                 if (myRef == null)
-                    return Result.Failed;
+                    return Result.Succeeded;
 
                 //Creates an element e from the selected object reference -- this will be the wall element
                 Element e = doc.GetElement(myRef);
@@ -146,25 +156,14 @@ namespace PSDcreator
                 //collects all objects that pass through the requirements of the bbfilter
                 collector.WherePasses(bbfilter);
 
-                //create a empty string to contain a list of items that could not be hidden
-                string FailedToHide = null;
-
                 //adds each element that passed the bbfilter to the current selection collector
                 //also checks to see if the element can be hidden. if it can't, it appents it to the failedtohide string
                 foreach (Element el in collector)
                 {
                     if (el.CanBeHidden(Embedview) == true)
                         selSet.Add(el.Id);
-                    else
-                        //Tell the user which elements couldn't be hidden
-                        FailedToHide += "Element name: " + el.Name.ToString() + "\n Category: " + el.Category.Name.ToString() + "\n ID :" + el.Id.ToString() + Environment.NewLine;
                 }
 
-                //shows the user a message if it couldn't hide some of the objects
-                if (FailedToHide != null)
-                    TaskDialog.Show("Error", "Revit was unable to hide the following elements:" + Environment.NewLine + FailedToHide);
-
-                //create new built in category filter
                 ICollection<BuiltInCategory> bcat = new List<BuiltInCategory>();
 
                 //add all levels and grids to filter -- these are filtered out by the viewtemplate, but are nice to have
@@ -227,39 +226,38 @@ namespace PSDcreator
 
             View view = null;
 
-            using (Transaction t = new Transaction(doc, "Duplicate View For Embeds"))
-            {
-                t.Start();
-                view = doc.GetElement(doc.ActiveView.Duplicate(ViewDuplicateOption.WithDetailing)) as View;
+                using (Transaction t = new Transaction(doc, "Duplicate View For Embeds"))
+                {
+                    t.Start();
+                    view = doc.GetElement(doc.ActiveView.Duplicate(ViewDuplicateOption.WithDetailing)) as View;
 
-                //the crop box isactive has to be changed to false so that when hidding elements
-                //it hides all the elements (some of which may be outside the crop view
-                view.CropBoxActive = false;
-                t.Commit();
+                    //the crop box isactive has to be changed to false so that when hidding elements
+                    //it hides all the elements (some of which may be outside the crop view
+                    view.CropBoxActive = false;
+                    t.Commit();
 
-                //switches to the created view -- not needed
-                //uidoc.ActiveView = view;
-            }
+                    //switches to the created view -- not needed
+                    //uidoc.ActiveView = view;
+                }
 
-            using (Transaction t2 = new Transaction(doc, "Change Sheet Properties"))
-            {
-                t2.Start();
+                using (Transaction t2 = new Transaction(doc, "Change Sheet Properties"))
+                {
+                    t2.Start();
 
-                view.get_Parameter(BuiltInParameter.VIEW_SCALE_PULLDOWN_IMPERIAL).Set(64);
-                view.get_Parameter(BuiltInParameter.VIEW_NAME).Set("PANEL_" + pnum + "_EMBEDS");
-                //this parameter set method doesn't work for some reason
-                //view.get_Parameter( BuiltInParameter.VIEW_TEMPLATE).Set("PSD_EMBEDS");
-                View viewTemplate = (from v in new FilteredElementCollector(doc)
-                                     .OfClass(typeof(View))
-                                     .Cast<View>()
-                                     where v.IsTemplate == true && v.Name == "PSD_EMBEDS"
-                                     select v)
-                                     .First();
-                view.ViewTemplateId = viewTemplate.Id;
-                t2.Commit();
-            }
-            //returns the embed view
-            return view;
+                    view.get_Parameter(BuiltInParameter.VIEW_SCALE_PULLDOWN_IMPERIAL).Set(64);
+                    view.get_Parameter(BuiltInParameter.VIEW_NAME).Set("PANEL_" + pnum + "_EMBEDS");
+
+                    View viewTemplate = (from v in new FilteredElementCollector(doc)
+                                         .OfClass(typeof(View))
+                                         .Cast<View>()
+                                         where v.IsTemplate == true && v.Name == "PSD_EMBEDS"
+                                         select v)
+                                         .First();
+                    view.ViewTemplateId = viewTemplate.Id;
+                    t2.Commit();
+                }
+                //returns the embed view
+                return view;
 
         }
 
@@ -325,7 +323,7 @@ namespace PSDcreator
                 //set the sheet information
                 viewSheet.Name = "PANEL";
                 viewSheet.SheetNumber = panelNumber;
-                //cant change disciplin from api....       
+                //cant change disciplin from api....   
 
                 t.Commit();
             }
