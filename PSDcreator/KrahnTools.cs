@@ -42,6 +42,15 @@ namespace PSDcreator
             btnOne.ToolTip = "Click this button to create panel shop drawings";
             //btnOne.LongDescription = "I need to sleep now...";
 
+
+            PushButton btnTwo = (PushButton)panelA.AddItem(new PushButtonData("TEST", "TEST", dll, "PSDcreator.CreateViewSection"));
+            // need reference to PresentationCore to get access to the System.Windows.Media.Imaging namespace which includes BitmapImage
+            btnTwo.LargeImage = new BitmapImage(new Uri(Path.Combine(folderPath, "PSDcreator/KrahnLogo32.png"), UriKind.Absolute));
+            btnTwo.Image = new BitmapImage(new Uri(Path.Combine(folderPath, "PSDcreator/KrahnLogo16.png"), UriKind.Absolute));
+            btnTwo.ToolTipImage = new BitmapImage(new Uri(Path.Combine(folderPath, "PSDcreator/Panel.png"), UriKind.Absolute));
+            btnTwo.ToolTip = "Click this button to create View Section";
+            //btnOne.LongDescription = "I need to sleep now...";
+
             return Result.Succeeded;
         }
 
@@ -480,6 +489,149 @@ namespace PSDcreator
         }
 
 
+        //TESTING
+
+
+
+
+
+    }
+
+    [Transaction(TransactionMode.Manual)]
+    public class CreateViewSection : IExternalCommand
+    {
+        static AddInId appId = new AddInId(new Guid("E5E1F080-0B67-4702-BE0D-1A847BE73A98"));
+        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
+        {
+            UIApplication uiapp = commandData.Application;
+            UIDocument uidoc = uiapp.ActiveUIDocument;
+            Document doc = uidoc.Document;
+
+            // Retrieve wall from selection set
+            Reference myRef = null;
+
+            try
+            {
+                //Prompts the user to select a wall (and only a wall) using the MySelectionFilter Class created below
+                myRef = uidoc.Selection.PickObject(ObjectType.Element, new MySelectionFilter("Walls"), "Select a wall");
+            }
+            catch (Autodesk.Revit.Exceptions.OperationCanceledException)
+            {
+                //this exception is called when the user presses the escape key. It is handled, ignored and the addin is terminated.
+                return Result.Succeeded;
+            }
+            catch (Autodesk.Revit.Exceptions.ArgumentOutOfRangeException)
+            {
+
+            }
+
+            Element e = doc.GetElement(myRef);
+
+            ICollection<ElementId> selSet = new List<ElementId>();
+
+            Wall wall = e as Wall;
+
+
+            // Ensure wall is straight
+
+            LocationCurve lc = wall.Location as LocationCurve;
+
+            Line line = lc.Curve as Line;
+
+            if (null == line)
+            {
+                message = "Unable to retrieve wall location line.";
+
+                return Result.Failed;
+            }
+
+            // Determine view family type to use
+
+            ViewFamilyType vft
+              = new FilteredElementCollector(doc)
+                .OfClass(typeof(ViewFamilyType))
+                .Cast<ViewFamilyType>()
+                .FirstOrDefault<ViewFamilyType>(x =>
+                 ViewFamily.Section == x.ViewFamily);
+
+            // Determine section box
+
+            XYZ p = line.GetEndPoint(0);
+            XYZ q = line.GetEndPoint(1);
+            XYZ v = q - p;
+
+           
+
+            BoundingBoxXYZ bb = wall.get_BoundingBox(null);
+            double minZ = bb.Min.Z;
+            double maxZ = bb.Max.Z;
+
+            double w = v.GetLength();
+            double h = maxZ - minZ;
+            double d = wall.WallType.Width;
+            double offset = 0.1 * w;
+
+            
+            XYZ max = new XYZ( w, maxZ + offset, offset );
+            XYZ min = new XYZ(-w, minZ - offset, -offset);
+
+            //XYZ min = new XYZ(-w, minZ - offset, -offset);
+            //XYZ max = new XYZ(w, maxZ + offset, 0);
+
+            XYZ midpoint = p + 0.5 * v;
+            XYZ walldir = v.Normalize();
+
+            //reverse the vector to put section on other side of wall -- need to find face of wall
+            walldir = walldir.Multiply(-1);
+
+            XYZ up = XYZ.BasisZ;
+            XYZ viewdir = walldir.CrossProduct(up);
+
+            Transform t = Transform.Identity;
+            t.Origin = midpoint;
+            t.BasisX = walldir;
+            t.BasisY = up;
+            t.BasisZ = viewdir;
+
+            BoundingBoxXYZ sectionBox = new BoundingBoxXYZ();
+            sectionBox.Transform = t;
+            sectionBox.Min = min;
+            sectionBox.Max = max;
+
+            // Create wall section view
+
+            using (Transaction tx = new Transaction(doc))
+            {
+                tx.Start("Create Wall Section View");
+
+                ViewSection.CreateSection(doc, vft.Id, sectionBox);
+
+                tx.Commit();
+            }
+            return Result.Succeeded;
+        }
+
+        private class MySelectionFilter : ISelectionFilter
+        {
+            static string CategoryName = "";
+
+            public MySelectionFilter(string name)
+            {
+                CategoryName = name;
+            }
+            public bool AllowElement(Element e)
+            {
+                if (e.Category.Name == CategoryName)
+                    return true;
+
+                return false;
+            }
+            //not used, but needed for the ISelectionFilter
+            public bool AllowReference(Reference r, XYZ point)
+            {
+                return true;
+            }
+        }
     }
 
 }
