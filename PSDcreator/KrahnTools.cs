@@ -53,8 +53,7 @@ namespace PSDcreator
 
 
 
-
-    [TransactionAttribute(TransactionMode.Manual)]
+        [TransactionAttribute(TransactionMode.Manual)]
     [RegenerationAttribute(RegenerationOption.Manual)]
     public class CreatePSD : IExternalCommand
     {
@@ -67,8 +66,24 @@ namespace PSDcreator
             Application app = uiapp.Application;
             Document doc = uidoc.Document;
 
-            //check to see if the PSD titleblock is in the current document.
-            FilteredElementCollector titleblockCollector = new FilteredElementCollector(doc).OfClass(typeof(Family));
+            using (uipKrahnTools inputForm = new uipKrahnTools())
+            {
+                inputForm.ShowDialog();
+
+                if(inputForm.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                {
+                    return Result.Cancelled;
+                }
+
+                if(inputForm.DialogResult == System.Windows.Forms.DialogResult.OK)
+                {
+                    //nothing for now
+                }
+            }
+
+
+                //check to see if the PSD titleblock is in the current document.
+                FilteredElementCollector titleblockCollector = new FilteredElementCollector(doc).OfClass(typeof(Family));
             Family family = titleblockCollector.FirstOrDefault<Element>(e => e.Name.Equals("Titleblock - 11 x 17_Krahn Engineering - PSD")) as Family;
             string FamilyPath = @"C:\ProgramData\Autodesk\Revit\Addins\2016\PSDcreator\Titleblock - 11 x 17_Krahn Engineering - PSD.rfa";
 
@@ -540,7 +555,7 @@ namespace PSDcreator
                     }
                 }
 
-                //move tag 15' up from bottom of panel
+                //move panel tag 15' up from bottom of panel
                 newTag.Location.Move(new XYZ(0, 0, 15));
 
                 // newTag.TagText is read-only, so we change the Type Mark type parameter to 
