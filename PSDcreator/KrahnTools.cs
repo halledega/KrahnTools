@@ -216,9 +216,9 @@ namespace PSDcreator
                     t.Commit();
                 }
 
-                try
-                {
-                    TagElement(doc, myRef, Embedview);
+                //try
+                //{
+                    TagElement(uidoc, myRef, Embedview);
                     //creates a new PSD sheet
                     ViewSheet PSDsheet = CreatePSDSheet(doc, panelNumber);
                     //place view on PSDsheet
@@ -227,12 +227,12 @@ namespace PSDcreator
                     View rebarView = DuplicateViewRebar(doc, panelNumber, Embedview);
                     //place rebar view on PSDsheet
                     PlaceOnSheet(doc, PSDsheet, rebarView);
-                }
-                catch
-                {
-                    TaskDialog.Show("Error", "Revit Encountered an Error. Sheet probably already exists.");
-                    return Result.Failed;
-                }
+                //}
+                //catch
+                //{
+                //    TaskDialog.Show("Error", "Revit Encountered an Error. Sheet probably already exists.");
+                //    return Result.Failed;
+                //}
             }
 
 
@@ -355,30 +355,6 @@ namespace PSDcreator
             }
         }
 
-        private XYZ Walldirection(UIDocument uidoc, Element e)
-        {
-            Document doc = uidoc.Document;
-
-            Wall pickedWall = e as Wall;
-
-            // Get the side faces
-
-            IList<Reference> sideFaces = HostObjectUtils.GetSideFaces(pickedWall, ShellLayerType.Interior);
-
-            // access the side face
-
-            Face face = uidoc.Document.GetElement(sideFaces[0]).GetGeometryObjectFromReference(sideFaces[0]) as Face;
-
-            Reference reference = face.Reference;
-
-            UV uv = new UV();
-
-            XYZ xyz = face.ComputeNormal(uv) as XYZ;
-
-            return xyz;
-
-        }
-
         private View CreateViewAndSectionMark(UIDocument uidoc, Element e)
         {
 
@@ -386,6 +362,7 @@ namespace PSDcreator
 
             Wall wall = e as Wall;
 
+            
             
             // Ensure wall is straight
 
@@ -402,9 +379,6 @@ namespace PSDcreator
                 //return;
             }
 
-            //Determine wall direction ME
-            XYZ wallfacedir = Walldirection(uidoc,e);
-
             // Determine view family type to use
 
             ViewFamilyType vft
@@ -413,7 +387,6 @@ namespace PSDcreator
                 .Cast<ViewFamilyType>()
                 .FirstOrDefault<ViewFamilyType>(x =>
                  ViewFamily.Section == x.ViewFamily);
-
 
             XYZ p = line.GetEndPoint(0);
             XYZ q = line.GetEndPoint(1);
@@ -432,31 +405,11 @@ namespace PSDcreator
             XYZ max = new XYZ(0.5 * w, maxZ, 1);
             XYZ min = new XYZ(0.5 * -w, minZ, -1);
 
-
-            XYZ midpoint = p + 0.5 * v;
-
-            //up will be defined as global + z
-            XYZ up = XYZ.BasisZ;
-
-
-            XYZ walldir = wallfacedir.CrossProduct(up);
-
-            Transform t = Transform.Identity;
-            t.Origin = new XYZ(midpoint.X, midpoint.Y, 0);
-
-            //in the transformed coordinates, x will point along the length of the wall
-            t.BasisX = walldir.Normalize();
-
-            //in the transformed coordinates, y will point up
-            t.BasisY = up;
-
-            //in the transformed coordinates, z will point towards the face of the wall
-            t.BasisZ = wallfacedir * -1;
-
+            Transform localcoordinates = HelperClass.getLocalCoordinates(e, uidoc);
 
             //Create a new bounding box. this box will define the limits of the section mark 
             BoundingBoxXYZ sectionBox = new BoundingBoxXYZ();
-            sectionBox.Transform = t;
+            sectionBox.Transform = localcoordinates;
             sectionBox.Min = min;
             sectionBox.Max = max;
 
@@ -478,9 +431,9 @@ namespace PSDcreator
             return view;
         }
 
-        public void TagElement(Document doc, Reference myRef, View view)
+        public void TagElement(UIDocument uidoc, Reference myRef, View view)
         {
-
+            Document doc = uidoc.Document;
             if (myRef == null)
                 return;
 
@@ -543,12 +496,12 @@ namespace PSDcreator
                 if (newTag == null)
                     throw new Exception("Create IndependentTag Failed.");
 
-
                 foreach (Element el in Embeds)
                 {
                     LocationPoint embedpoint = el.Location as LocationPoint;
                     XYZ embedXyz = embedpoint.Point;
                     IndependentTag embedTag = doc.Create.NewTag(view, el, false, tagMode, tagorn, embedXyz);
+
                     if (embedTag == null)
                     {
                         throw new Exception("Create IndependentTag Failed.");
