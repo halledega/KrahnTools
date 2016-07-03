@@ -40,16 +40,7 @@ namespace PSDcreator
             btnOne.Image = new BitmapImage(new Uri(Path.Combine(folderPath, "PSDcreator/KrahnLogo16.png"), UriKind.Absolute));
             btnOne.ToolTipImage = new BitmapImage(new Uri(Path.Combine(folderPath, "PSDcreator/Panel.png"), UriKind.Absolute));
             btnOne.ToolTip = "Click this button to create panel shop drawings";
-            //btnOne.LongDescription = "I need to sleep now...";
-
-
-            PushButton btnTwo = (PushButton)panelA.AddItem(new PushButtonData("TEST", "TEST", dll, "PSDcreator.CreateViewSection"));
-            // need reference to PresentationCore to get access to the System.Windows.Media.Imaging namespace which includes BitmapImage
-            btnTwo.LargeImage = new BitmapImage(new Uri(Path.Combine(folderPath, "PSDcreator/KrahnLogo32.png"), UriKind.Absolute));
-            btnTwo.Image = new BitmapImage(new Uri(Path.Combine(folderPath, "PSDcreator/KrahnLogo16.png"), UriKind.Absolute));
-            btnTwo.ToolTipImage = new BitmapImage(new Uri(Path.Combine(folderPath, "PSDcreator/Panel.png"), UriKind.Absolute));
-            btnTwo.ToolTip = "Click this button to create View Section";
-            //btnOne.LongDescription = "I need to sleep now...";
+            //btnOne.LongDescription = "";
 
             return Result.Succeeded;
         }
@@ -87,7 +78,7 @@ namespace PSDcreator
                 // It is not present, so check for the file to load it from:
                 if (!File.Exists(FamilyPath))
                 {
-                   TaskDialog.Show("Error", "The PSD Template is missing from the addins folder.");
+                    TaskDialog.Show("Error", "The PSD Template is missing from the addins folder.");
                     return Result.Failed;
                 }
 
@@ -128,20 +119,22 @@ namespace PSDcreator
                 }
                 catch (Autodesk.Revit.Exceptions.ArgumentOutOfRangeException)
                 {
-
+                    
                 }
-
+                
                 if (myRef == null)
                     return Result.Succeeded;
 
                 //Creates an element e from the selected object reference -- this will be the wall element
                 Element e = doc.GetElement(myRef);
 
+                View sectionView = CreateViewAndSectionMark(uidoc, e);
+                
                 //get the mark parameter and set it to the panel number variable
                 string panelNumber = e.get_Parameter(BuiltInParameter.ALL_MODEL_MARK).AsString();
 
                 //duplicate the active view using the the DuplicateViewEmbeds Function created below
-                View Embedview = DuplicateViewEmbeds(doc, panelNumber);
+                View Embedview = SetupViewEmbeds(doc, panelNumber,sectionView);
 
                 //Creates a selection filter to dump objects in for later selection
                 ICollection<ElementId> selSet = new List<ElementId>();
@@ -230,43 +223,27 @@ namespace PSDcreator
 
         }
 
-        private View DuplicateViewEmbeds(Document doc, string pnum)
+        private View SetupViewEmbeds(Document doc, string pnum, View view)
         {
 
-            View view = null;
+            using (Transaction t2 = new Transaction(doc, "Change Sheet Properties"))
+            {
+                t2.Start();
 
-                using (Transaction t = new Transaction(doc, "Duplicate View For Embeds"))
-                {
-                    t.Start();
-                    view = doc.GetElement(doc.ActiveView.Duplicate(ViewDuplicateOption.WithDetailing)) as View;
+                view.get_Parameter(BuiltInParameter.VIEW_SCALE_PULLDOWN_IMPERIAL).Set(64);
+                view.get_Parameter(BuiltInParameter.VIEW_NAME).Set("PANEL_" + pnum + "_EMBEDS");
 
-                    //the crop box isactive has to be changed to false so that when hidding elements
-                    //it hides all the elements (some of which may be outside the crop view
-                    view.CropBoxActive = false;
-                    t.Commit();
-
-                    //switches to the created view -- not needed
-                    //uidoc.ActiveView = view;
-                }
-
-                using (Transaction t2 = new Transaction(doc, "Change Sheet Properties"))
-                {
-                    t2.Start();
-
-                    view.get_Parameter(BuiltInParameter.VIEW_SCALE_PULLDOWN_IMPERIAL).Set(64);
-                    view.get_Parameter(BuiltInParameter.VIEW_NAME).Set("PANEL_" + pnum + "_EMBEDS");
-
-                    View viewTemplate = (from v in new FilteredElementCollector(doc)
-                                         .OfClass(typeof(View))
-                                         .Cast<View>()
-                                         where v.IsTemplate == true && v.Name == "PSD_EMBEDS"
-                                         select v)
-                                         .First();
-                    view.ViewTemplateId = viewTemplate.Id;
-                    t2.Commit();
-                }
-                //returns the embed view
-                return view;
+                View viewTemplate = (from v in new FilteredElementCollector(doc)
+                                     .OfClass(typeof(View))
+                                     .Cast<View>()
+                                     where v.IsTemplate == true && v.Name == "PSD_EMBEDS"
+                                     select v)
+                                     .First();
+                view.ViewTemplateId = viewTemplate.Id;
+                t2.Commit();
+            }
+            //returns the embed view
+            return view;
 
         }
 
@@ -274,12 +251,11 @@ namespace PSDcreator
         {
 
 
-            using (Transaction t = new Transaction(doc, "Duplicate View"))
+            using (Transaction t = new Transaction(doc, "Duplicate Embed View"))
             {
                 t.Start();
                 //the crop box isactive has to be changed to false so that when hidding elements
                 //it hides all the elements (some of which may be outside the crop view
-                view.CropBoxActive = false;
                 view = doc.GetElement(view.Duplicate(ViewDuplicateOption.WithDetailing)) as View;
                 t.Commit();
 
@@ -364,26 +340,127 @@ namespace PSDcreator
             }
         }
 
-        private class MySelectionFilter : ISelectionFilter
+        private XYZ Walldirection(UIDocument uidoc, Element e)
         {
-            static string CategoryName = "";
+            Document doc = uidoc.Document;
 
-            public MySelectionFilter(string name)
-            {
-                CategoryName = name;
-            }
-            public bool AllowElement(Element e)
-            {
-                if (e.Category.Name == CategoryName)
-                    return true;
+            Wall pickedWall = e as Wall;
 
-                return false;
-            }
-            //not used, but needed for the ISelectionFilter
-            public bool AllowReference(Reference r, XYZ point)
+            // Get the side faces
+
+            IList<Reference> sideFaces = HostObjectUtils.GetSideFaces(pickedWall, ShellLayerType.Interior);
+
+            // access the side face
+
+            Face face = uidoc.Document.GetElement(sideFaces[0]).GetGeometryObjectFromReference(sideFaces[0]) as Face;
+
+            Reference reference = face.Reference;
+
+            UV uv = new UV();
+
+            XYZ xyz = face.ComputeNormal(uv) as XYZ;
+
+            return xyz;
+
+        }
+
+        private View CreateViewAndSectionMark(UIDocument uidoc, Element e)
+        {
+
+            Document doc = uidoc.Document;
+
+            Wall wall = e as Wall;
+
+            
+            // Ensure wall is straight
+
+            LocationCurve lc = wall.Location as LocationCurve;
+
+            Line line = lc.Curve as Line;
+
+
+
+            if (null == line)
             {
-                return true;
+                TaskDialog.Show("Error", "Unable to retrieve wall location line.");
+
+                //return;
             }
+
+            //Determine wall direction ME
+            XYZ wallfacedir = Walldirection(uidoc,e);
+
+            // Determine view family type to use
+
+            ViewFamilyType vft
+              = new FilteredElementCollector(doc)
+                .OfClass(typeof(ViewFamilyType))
+                .Cast<ViewFamilyType>()
+                .FirstOrDefault<ViewFamilyType>(x =>
+                 ViewFamily.Section == x.ViewFamily);
+
+
+            XYZ p = line.GetEndPoint(0);
+            XYZ q = line.GetEndPoint(1);
+            XYZ v = q - p;
+
+            //Gets the bounding box of the wall
+            BoundingBoxXYZ bb = wall.get_BoundingBox(null);
+            double minZ = bb.Min.Z;
+            double maxZ = bb.Max.Z;
+
+            //gets the width and height of the wall
+            double w = v.GetLength();
+            double h = maxZ - minZ;
+
+            //this is the bottom left and upper right coordinate of the viewport window. the Z value also sets the depth of the view
+            XYZ max = new XYZ(0.5 * w, maxZ, 1);
+            XYZ min = new XYZ(0.5 * -w, minZ, -1);
+
+
+            XYZ midpoint = p + 0.5 * v;
+
+            //up will be defined as global + z
+            XYZ up = XYZ.BasisZ;
+
+
+            XYZ walldir = wallfacedir.CrossProduct(up);
+
+            Transform t = Transform.Identity;
+            t.Origin = new XYZ(midpoint.X, midpoint.Y, 0);
+
+            //in the transformed coordinates, x will point along the length of the wall
+            t.BasisX = walldir.Normalize();
+
+            //in the transformed coordinates, y will point up
+            t.BasisY = up;
+
+            //in the transformed coordinates, z will point towards the face of the wall
+            t.BasisZ = wallfacedir * -1;
+
+
+            //Create a new bounding box. this box will define the limits of the section mark 
+            BoundingBoxXYZ sectionBox = new BoundingBoxXYZ();
+            sectionBox.Transform = t;
+            sectionBox.Min = min;
+            sectionBox.Max = max;
+
+            // Create wall section view
+            View view = null;
+
+            using (Transaction tx = new Transaction(doc))
+            {
+                tx.Start("Create Wall Section View");
+
+                view = ViewSection.CreateSection(doc, vft.Id, sectionBox) as View;
+
+                //cropbox is turned off so all elements get hidden when passing the active view filter
+                view.CropBoxActive = false;
+
+                tx.Commit();
+            }
+
+            return view;
         }
 
         public void TagElement(Document doc, Reference myRef, View view)
@@ -397,7 +474,7 @@ namespace PSDcreator
             Wall wall = e as Wall;
 
             //Creates a selection filter to dump objects in for later selection
-            ICollection<ElementId> selSet = new List<ElementId>();
+            ICollection<ElementId> selec = new List<ElementId>();
 
             //Gets the bounding box of the selected wall element picked above
             BoundingBoxXYZ bb = e.get_BoundingBox(view);
@@ -427,7 +504,7 @@ namespace PSDcreator
             {
                 if (el.Name.Contains("EM"))
                 {
-                    selSet.Add(el.Id);
+                    selec.Add(el.Id);
                     Embeds.Add(el);
                 }
             }
@@ -436,7 +513,7 @@ namespace PSDcreator
             TagMode tagMode = TagMode.TM_ADDBY_CATEGORY;
             TagOrientation tagorn = TagOrientation.Horizontal;
 
-            // Add the tag to the middle of the wall
+            //Tag the wall and place it in the middle of the wall
             LocationCurve wallLoc = wall.Location as LocationCurve;
 
             XYZ wallStart = wallLoc.Curve.GetEndPoint(0);
@@ -488,129 +565,6 @@ namespace PSDcreator
             }
         }
 
-
-        //TESTING
-
-
-
-
-
-    }
-
-    [Transaction(TransactionMode.Manual)]
-    public class CreateViewSection : IExternalCommand
-    {
-        static AddInId appId = new AddInId(new Guid("E5E1F080-0B67-4702-BE0D-1A847BE73A98"));
-        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
-        {
-            UIApplication uiapp = commandData.Application;
-            UIDocument uidoc = uiapp.ActiveUIDocument;
-            Document doc = uidoc.Document;
-
-            // Retrieve wall from selection set
-            Reference myRef = null;
-
-            try
-            {
-                //Prompts the user to select a wall (and only a wall) using the MySelectionFilter Class created below
-                myRef = uidoc.Selection.PickObject(ObjectType.Element, new MySelectionFilter("Walls"), "Select a wall");
-            }
-            catch (Autodesk.Revit.Exceptions.OperationCanceledException)
-            {
-                //this exception is called when the user presses the escape key. It is handled, ignored and the addin is terminated.
-                return Result.Succeeded;
-            }
-            catch (Autodesk.Revit.Exceptions.ArgumentOutOfRangeException)
-            {
-
-            }
-
-            Element e = doc.GetElement(myRef);
-
-            ICollection<ElementId> selSet = new List<ElementId>();
-
-            Wall wall = e as Wall;
-
-
-            // Ensure wall is straight
-
-            LocationCurve lc = wall.Location as LocationCurve;
-
-            Line line = lc.Curve as Line;
-
-            if (null == line)
-            {
-                message = "Unable to retrieve wall location line.";
-
-                return Result.Failed;
-            }
-
-            // Determine view family type to use
-
-            ViewFamilyType vft
-              = new FilteredElementCollector(doc)
-                .OfClass(typeof(ViewFamilyType))
-                .Cast<ViewFamilyType>()
-                .FirstOrDefault<ViewFamilyType>(x =>
-                 ViewFamily.Section == x.ViewFamily);
-
-            // Determine section box
-
-            XYZ p = line.GetEndPoint(0);
-            XYZ q = line.GetEndPoint(1);
-            XYZ v = q - p;
-
-           
-
-            BoundingBoxXYZ bb = wall.get_BoundingBox(null);
-            double minZ = bb.Min.Z;
-            double maxZ = bb.Max.Z;
-
-            double w = v.GetLength();
-            double h = maxZ - minZ;
-            double d = wall.WallType.Width;
-            double offset = 0.1 * w;
-
-            
-            XYZ max = new XYZ( w, maxZ + offset, offset );
-            XYZ min = new XYZ(-w, minZ - offset, -offset);
-
-            //XYZ min = new XYZ(-w, minZ - offset, -offset);
-            //XYZ max = new XYZ(w, maxZ + offset, 0);
-
-            XYZ midpoint = p + 0.5 * v;
-            XYZ walldir = v.Normalize();
-
-            //reverse the vector to put section on other side of wall -- need to find face of wall
-            walldir = walldir.Multiply(-1);
-
-            XYZ up = XYZ.BasisZ;
-            XYZ viewdir = walldir.CrossProduct(up);
-
-            Transform t = Transform.Identity;
-            t.Origin = midpoint;
-            t.BasisX = walldir;
-            t.BasisY = up;
-            t.BasisZ = viewdir;
-
-            BoundingBoxXYZ sectionBox = new BoundingBoxXYZ();
-            sectionBox.Transform = t;
-            sectionBox.Min = min;
-            sectionBox.Max = max;
-
-            // Create wall section view
-
-            using (Transaction tx = new Transaction(doc))
-            {
-                tx.Start("Create Wall Section View");
-
-                ViewSection.CreateSection(doc, vft.Id, sectionBox);
-
-                tx.Commit();
-            }
-            return Result.Succeeded;
-        }
-
         private class MySelectionFilter : ISelectionFilter
         {
             static string CategoryName = "";
@@ -632,8 +586,9 @@ namespace PSDcreator
                 return true;
             }
         }
-    }
 
+    }
 }
+
 
 
