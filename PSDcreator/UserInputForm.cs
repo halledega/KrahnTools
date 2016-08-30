@@ -10,11 +10,16 @@ using System.Windows.Forms;
 
 namespace PSDcreator
 {
+  
     public partial class uipKrahnTools : Form
     {
+
+        public Boolean isStructural;
+
         public uipKrahnTools()
         {
             InitializeComponent();
+
 
             rtxtInstructions.Text = "Steps to create panel shop drawings: \n"
                 + "\t Step 1: Make sure the PSD titleblock is loaded into the project \n"
@@ -24,6 +29,22 @@ namespace PSDcreator
                 + "created and placed on to a sheet \n"
                 + "\t Step 4: Proceed to the sheet view to continue working with panels";
 
+
+            
+            isStructural = rdo_Struct.Checked;
+
+        }
+
+        
+        
+        private void rdo_Struct_CheckedChanged(object sender, EventArgs e)
+        {
+            isStructural = rdo_Struct.Checked;
+        }
+
+        private void rdo_nonStruct_CheckedChanged(object sender, EventArgs e)
+        {
+            isStructural = rdo_Struct.Checked;
         }
     }
 }

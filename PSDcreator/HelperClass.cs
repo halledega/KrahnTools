@@ -17,9 +17,17 @@ namespace PSDcreator
     class HelperClass
     {
 
-        public static Transform getLocalCoordinates(Element element, UIDocument uidoc)
+        public static Transform getLocalCoordinates(Element element,Boolean isStruct, UIDocument uidoc)
         {
             Transform transform = null;
+
+            int isstruct = 1;
+
+
+            if(isStruct == true)
+            {
+                isstruct = -1;
+            }
 
             if (element is Wall)
             {
@@ -57,9 +65,9 @@ namespace PSDcreator
 
                 transform = Transform.Identity;
                 transform.Origin = new XYZ(midpoint.X, midpoint.Y, 0);
-                transform.BasisX = walldir.Normalize();
+                transform.BasisX = walldir.Normalize() * isstruct * -1;
                 transform.BasisY = up;
-                transform.BasisZ = wallfacedir * -1;
+                transform.BasisZ = wallfacedir * isstruct;
             }
             return transform;
         }

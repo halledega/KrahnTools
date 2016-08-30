@@ -10,3 +10,10 @@ C:\Users\Dylan\Documents\GitHub\KrahnTools\PSDcreator\obj\Debug\PSDcreator.dll
 C:\Users\Dylan\Documents\GitHub\KrahnTools\PSDcreator\obj\Debug\PSDcreator.pdb
 C:\Users\Dylan\Documents\GitHub\KrahnTools\PSDcreator\obj\Debug\PSDcreator.csproj.GenerateResource.Cache
 C:\Users\Dylan\Documents\GitHub\KrahnTools\PSDcreator\obj\Debug\PSDcreator.uipKrahnTools.resources
+C:\Users\dylanj\Documents\GitHub\KrahnTools\PSDcreator\bin\Debug\PSDcreator.dll
+C:\Users\dylanj\Documents\GitHub\KrahnTools\PSDcreator\bin\Debug\PSDcreator.pdb
+C:\Users\dylanj\Documents\GitHub\KrahnTools\PSDcreator\obj\Debug\PSDcreator.csprojResolveAssemblyReference.cache
+C:\Users\dylanj\Documents\GitHub\KrahnTools\PSDcreator\obj\Debug\PSDcreator.uipKrahnTools.resources
+C:\Users\dylanj\Documents\GitHub\KrahnTools\PSDcreator\obj\Debug\PSDcreator.csproj.GenerateResource.Cache
+C:\Users\dylanj\Documents\GitHub\KrahnTools\PSDcreator\obj\Debug\PSDcreator.dll
+C:\Users\dylanj\Documents\GitHub\KrahnTools\PSDcreator\obj\Debug\PSDcreator.pdb

@@ -57,7 +57,11 @@ namespace PSDcreator
     [RegenerationAttribute(RegenerationOption.Manual)]
     public class CreatePSD : IExternalCommand
     {
+        public bool StructSelected;
+
+
         static AddInId appId = new AddInId(new Guid("E5E1F080-0B67-4702-BE0D-1A847BE73A98"));
+
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             //Get application and document objects
@@ -77,7 +81,15 @@ namespace PSDcreator
 
                 if(inputForm.DialogResult == System.Windows.Forms.DialogResult.OK)
                 {
-                    //nothing for now
+                    if(inputForm.isStructural == true)
+                    {
+                        StructSelected = true;
+                        
+                    }
+                    else
+                    {
+                        StructSelected = false;
+                    }
                 }
             }
 
@@ -236,7 +248,7 @@ namespace PSDcreator
             }
 
 
-        }
+        }     
 
         private View SetupViewEmbeds(Document doc, string pnum, View view)
         {
@@ -405,7 +417,7 @@ namespace PSDcreator
             XYZ max = new XYZ(0.5 * w, maxZ, 1);
             XYZ min = new XYZ(0.5 * -w, minZ, -1);
 
-            Transform localcoordinates = HelperClass.getLocalCoordinates(e, uidoc);
+            Transform localcoordinates = HelperClass.getLocalCoordinates(e,StructSelected, uidoc);
 
             //Create a new bounding box. this box will define the limits of the section mark 
             BoundingBoxXYZ sectionBox = new BoundingBoxXYZ();
