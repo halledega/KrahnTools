@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("PSDcreator")]
+[assembly: AssemblyTitle("KrahnTools")]
 [assembly: AssemblyDescription("Krahn Engineering Tools")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Krahn Engineering")]
-[assembly: AssemblyProduct("PSDcreator")]
+[assembly: AssemblyProduct("KrahnTools")]
 [assembly: AssemblyCopyright("Copyright Dylan James ©  2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
