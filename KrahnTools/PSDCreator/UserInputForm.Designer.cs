@@ -1,4 +1,4 @@
-﻿namespace PSDcreator
+﻿namespace KrahnTools.PSDcreator
 {
     partial class uipKrahnTools
     {

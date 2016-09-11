@@ -12,48 +12,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 
-
-
-
-
-namespace PSDcreator
+namespace KrahnTools.PSDCreator
 {
 
-
-    class ribbonUI : IExternalApplication
-    {
-        public Autodesk.Revit.UI.Result OnStartup(UIControlledApplication application)
-        {
-            string folderPath = @"C:\ProgramData\Autodesk\Revit\Addins\2016";
-            string dll = Path.Combine(folderPath, "PSDcreator.dll");
-
-            string myRibbon = "Krahn Tools";
-            application.CreateRibbonTab(myRibbon);
-
-            RibbonPanel panelA = application.CreateRibbonPanel(myRibbon, "PSD Tools");
-
-            // Standard buttons
-
-            PushButton btnOne = (PushButton)panelA.AddItem(new PushButtonData("Create PSD", "CreatePSD", dll, "PSDcreator.CreatePSD"));
-            // need reference to PresentationCore to get access to the System.Windows.Media.Imaging namespace which includes BitmapImage
-            btnOne.LargeImage = new BitmapImage(new Uri(Path.Combine(folderPath, "PSDcreator/KrahnLogo32.png"), UriKind.Absolute));
-            btnOne.Image = new BitmapImage(new Uri(Path.Combine(folderPath, "PSDcreator/KrahnLogo16.png"), UriKind.Absolute));
-            btnOne.ToolTipImage = new BitmapImage(new Uri(Path.Combine(folderPath, "PSDcreator/Panel.png"), UriKind.Absolute));
-            btnOne.ToolTip = "Click this button to create panel shop drawings";
-            //btnOne.LongDescription = "";
-
-            return Result.Succeeded;
-        }
-
-        public Result OnShutdown(UIControlledApplication application)
-        {
-            return Result.Succeeded;
-        }
-    }
-
-
-
-        [TransactionAttribute(TransactionMode.Manual)]
+    [TransactionAttribute(TransactionMode.Manual)]
     [RegenerationAttribute(RegenerationOption.Manual)]
     public class CreatePSD : IExternalCommand
     {
@@ -74,17 +36,17 @@ namespace PSDcreator
             {
                 inputForm.ShowDialog();
 
-                if(inputForm.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                if (inputForm.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 {
                     return Result.Cancelled;
                 }
 
-                if(inputForm.DialogResult == System.Windows.Forms.DialogResult.OK)
+                if (inputForm.DialogResult == System.Windows.Forms.DialogResult.OK)
                 {
-                    if(inputForm.isStructural == true)
+                    if (inputForm.isStructural == true)
                     {
                         StructSelected = true;
-                        
+
                     }
                     else
                     {
@@ -94,8 +56,8 @@ namespace PSDcreator
             }
 
 
-                //check to see if the PSD titleblock is in the current document.
-                FilteredElementCollector titleblockCollector = new FilteredElementCollector(doc).OfClass(typeof(Family));
+            //check to see if the PSD titleblock is in the current document.
+            FilteredElementCollector titleblockCollector = new FilteredElementCollector(doc).OfClass(typeof(Family));
             Family family = titleblockCollector.FirstOrDefault<Element>(e => e.Name.Equals("Titleblock - 11 x 17_Krahn Engineering - PSD")) as Family;
             string FamilyPath = @"C:\ProgramData\Autodesk\Revit\Addins\2016\PSDcreator\Titleblock - 11 x 17_Krahn Engineering - PSD.rfa";
 
@@ -146,9 +108,9 @@ namespace PSDcreator
                 }
                 catch (Autodesk.Revit.Exceptions.ArgumentOutOfRangeException)
                 {
-                    
+
                 }
-                
+
                 if (myRef == null)
                     return Result.Succeeded;
 
@@ -156,12 +118,12 @@ namespace PSDcreator
                 Element e = doc.GetElement(myRef);
 
                 View sectionView = CreateViewAndSectionMark(uidoc, e);
-                
+
                 //get the mark parameter and set it to the panel number variable
                 string panelNumber = e.get_Parameter(BuiltInParameter.ALL_MODEL_MARK).AsString();
 
                 //duplicate the active view using the the DuplicateViewEmbeds Function created below
-                View Embedview = SetupViewEmbeds(doc, panelNumber,sectionView);
+                View Embedview = SetupViewEmbeds(doc, panelNumber, sectionView);
 
                 //Creates a selection filter to dump objects in for later selection
                 ICollection<ElementId> selSet = new List<ElementId>();
@@ -230,15 +192,15 @@ namespace PSDcreator
 
                 //try
                 //{
-                    TagElement(uidoc, myRef, Embedview);
-                    //creates a new PSD sheet
-                    ViewSheet PSDsheet = CreatePSDSheet(doc, panelNumber);
-                    //place view on PSDsheet
-                    PlaceOnSheet(doc, PSDsheet, Embedview);
-                    //creates rebar view
-                    View rebarView = DuplicateViewRebar(doc, panelNumber, Embedview);
-                    //place rebar view on PSDsheet
-                    PlaceOnSheet(doc, PSDsheet, rebarView);
+                TagElement(uidoc, myRef, Embedview);
+                //creates a new PSD sheet
+                ViewSheet PSDsheet = CreatePSDSheet(doc, panelNumber);
+                //place view on PSDsheet
+                PlaceOnSheet(doc, PSDsheet, Embedview);
+                //creates rebar view
+                View rebarView = DuplicateViewRebar(doc, panelNumber, Embedview);
+                //place rebar view on PSDsheet
+                PlaceOnSheet(doc, PSDsheet, rebarView);
                 //}
                 //catch
                 //{
@@ -248,7 +210,7 @@ namespace PSDcreator
             }
 
 
-        }     
+        }
 
         private View SetupViewEmbeds(Document doc, string pnum, View view)
         {
@@ -374,8 +336,8 @@ namespace PSDcreator
 
             Wall wall = e as Wall;
 
-            
-            
+
+
             // Ensure wall is straight
 
             LocationCurve lc = wall.Location as LocationCurve;
@@ -417,7 +379,7 @@ namespace PSDcreator
             XYZ max = new XYZ(0.5 * w, maxZ, 1);
             XYZ min = new XYZ(0.5 * -w, minZ, -1);
 
-            Transform localcoordinates = HelperClass.getLocalCoordinates(e,StructSelected, uidoc);
+            Transform localcoordinates = HelperClass.getLocalCoordinates(e, StructSelected, uidoc);
 
             //Create a new bounding box. this box will define the limits of the section mark 
             BoundingBoxXYZ sectionBox = new BoundingBoxXYZ();
@@ -566,9 +528,5 @@ namespace PSDcreator
                 return true;
             }
         }
-
-    }
-}
-
-
-
+    }//end class
+}//end namespace

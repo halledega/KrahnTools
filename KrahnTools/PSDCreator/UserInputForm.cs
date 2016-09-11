@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace PSDcreator
+namespace KrahnTools.PSDcreator
 {
   
     public partial class uipKrahnTools : Form
