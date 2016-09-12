@@ -32,7 +32,7 @@ namespace KrahnTools.PSDCreator
             Application app = uiapp.Application;
             Document doc = uidoc.Document;
 
-            using (uipKrahnTools inputForm = new uipKrahnTools())
+            using (PSDOptions_form inputForm = new PSDOptions_form())
             {
                 inputForm.ShowDialog();
 
@@ -59,7 +59,7 @@ namespace KrahnTools.PSDCreator
             //check to see if the PSD titleblock is in the current document.
             FilteredElementCollector titleblockCollector = new FilteredElementCollector(doc).OfClass(typeof(Family));
             Family family = titleblockCollector.FirstOrDefault<Element>(e => e.Name.Equals("Titleblock - 11 x 17_Krahn Engineering - PSD")) as Family;
-            string FamilyPath = @"C:\ProgramData\Autodesk\Revit\Addins\2016\PSDcreator\Titleblock - 11 x 17_Krahn Engineering - PSD.rfa";
+            string FamilyPath = @"C:\ProgramData\Autodesk\Revit\Addins\2016\PSDCreator\Titleblock - 11 x 17_Krahn Engineering - PSD.rfa";
 
             //if the titleblock doesn't exist in the current document, it is imported.
             if (null == family)

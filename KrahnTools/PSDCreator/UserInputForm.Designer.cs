@@ -1,6 +1,6 @@
-﻿namespace KrahnTools.PSDcreator
+﻿namespace KrahnTools.PSDCreator
 {
-    partial class uipKrahnTools
+    partial class PSDOptions_form
     {
         /// <summary>
         /// Required designer variable.
@@ -28,14 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(uipKrahnTools));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PSDOptions_form));
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnOK = new System.Windows.Forms.Button();
             this.gbxInstructions = new System.Windows.Forms.GroupBox();
             this.rtxtInstructions = new System.Windows.Forms.RichTextBox();
             this.gbx_Placement = new System.Windows.Forms.GroupBox();
-            this.rdo_Struct = new System.Windows.Forms.RadioButton();
             this.rdo_nonStruct = new System.Windows.Forms.RadioButton();
+            this.rdo_Struct = new System.Windows.Forms.RadioButton();
             this.gbxInstructions.SuspendLayout();
             this.gbx_Placement.SuspendLayout();
             this.SuspendLayout();
@@ -99,6 +99,17 @@
             this.gbx_Placement.TabStop = false;
             this.gbx_Placement.Text = "Side To Place Section Mark:";
             // 
+            // rdo_nonStruct
+            // 
+            this.rdo_nonStruct.AutoSize = true;
+            this.rdo_nonStruct.Location = new System.Drawing.Point(7, 44);
+            this.rdo_nonStruct.Name = "rdo_nonStruct";
+            this.rdo_nonStruct.Size = new System.Drawing.Size(93, 17);
+            this.rdo_nonStruct.TabIndex = 1;
+            this.rdo_nonStruct.Text = "Non-Structural";
+            this.rdo_nonStruct.UseVisualStyleBackColor = true;
+            this.rdo_nonStruct.CheckedChanged += new System.EventHandler(this.rdo_nonStruct_CheckedChanged);
+            // 
             // rdo_Struct
             // 
             this.rdo_Struct.AutoSize = true;
@@ -112,18 +123,7 @@
             this.rdo_Struct.UseVisualStyleBackColor = true;
             this.rdo_Struct.CheckedChanged += new System.EventHandler(this.rdo_Struct_CheckedChanged);
             // 
-            // rdo_nonStruct
-            // 
-            this.rdo_nonStruct.AutoSize = true;
-            this.rdo_nonStruct.Location = new System.Drawing.Point(7, 44);
-            this.rdo_nonStruct.Name = "rdo_nonStruct";
-            this.rdo_nonStruct.Size = new System.Drawing.Size(93, 17);
-            this.rdo_nonStruct.TabIndex = 1;
-            this.rdo_nonStruct.Text = "Non-Structural";
-            this.rdo_nonStruct.UseVisualStyleBackColor = true;
-            this.rdo_nonStruct.CheckedChanged += new System.EventHandler(this.rdo_nonStruct_CheckedChanged);
-            // 
-            // uipKrahnTools
+            // PSDOptions_form
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -133,9 +133,9 @@
             this.Controls.Add(this.btnOK);
             this.Controls.Add(this.btnCancel);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Name = "uipKrahnTools";
+            this.Name = "PSDOptions_form";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Krahn Tools";
+            this.Text = "PSD Creator Options";
             this.gbxInstructions.ResumeLayout(false);
             this.gbx_Placement.ResumeLayout(false);
             this.gbx_Placement.PerformLayout();

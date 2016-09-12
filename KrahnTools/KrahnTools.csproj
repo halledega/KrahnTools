@@ -64,10 +64,19 @@
       <DependentUpon>UserInputForm.cs</DependentUpon>
     </Compile>
     <Compile Include="SpecialCharacters\SpecialCharacters.cs" />
+    <Compile Include="SpecialCharacters\SpecialCharacters_form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SpecialCharacters\SpecialCharacters_form.Designer.cs">
+      <DependentUpon>SpecialCharacters_form.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="PSDCreator\UserInputForm.resx">
       <DependentUpon>UserInputForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SpecialCharacters\SpecialCharacters_form.resx">
+      <DependentUpon>SpecialCharacters_form.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

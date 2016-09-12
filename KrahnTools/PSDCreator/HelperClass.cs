@@ -12,7 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 
-namespace PSDcreator
+namespace KrahnTools.PSDCreator
 {
     class HelperClass
     {

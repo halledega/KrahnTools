@@ -8,15 +8,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace KrahnTools.PSDcreator
+namespace KrahnTools.PSDCreator
 {
   
-    public partial class uipKrahnTools : Form
+    public partial class PSDOptions_form : Form
     {
 
         public Boolean isStructural;
 
-        public uipKrahnTools()
+        public PSDOptions_form()
         {
             InitializeComponent();
 
