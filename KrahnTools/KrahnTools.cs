@@ -26,6 +26,7 @@ namespace KrahnTools
 
             RibbonPanel panelA = application.CreateRibbonPanel(myRibbon, "PSD Tools");
             RibbonPanel panelB = application.CreateRibbonPanel(myRibbon, "Text Tools");
+            RibbonPanel panelC = application.CreateRibbonPanel(myRibbon, "Text Tools");
 
             // Standard buttons
 
@@ -43,6 +44,14 @@ namespace KrahnTools
             btnBOne.Image = new BitmapImage(new Uri(Path.Combine(folderPath, "imgs/diameter_16.png"), UriKind.Absolute));
             //btnBOne.ToolTipImage = new BitmapImage(new Uri(Path.Combine(folderPath, "imgs/diameter_32.png"), UriKind.Absolute));
             btnBOne.ToolTip = "Copies special charecters (Alt-Codes) to clip board to be pastes into text block";
+            //btnOne.LongDescription = "";
+
+            PushButton btnCOne = (PushButton)panelB.AddItem(new PushButtonData("Get Climatic Data", "ClimaticData", dll, "KrahnTools.ClimaticData.ClimaticData"));
+            // need reference to PresentationCore to get access to the System.Windows.Media.Imaging namespace which includes BitmapImage
+            btnCOne.LargeImage = new BitmapImage(new Uri(Path.Combine(folderPath, "imgs/diameter_16.png"), UriKind.Absolute));
+            btnCOne.Image = new BitmapImage(new Uri(Path.Combine(folderPath, "imgs/diameter_16.png"), UriKind.Absolute));
+            //btnBOne.ToolTipImage = new BitmapImage(new Uri(Path.Combine(folderPath, "imgs/diameter_32.png"), UriKind.Absolute));
+            btnCOne.ToolTip = "Allows users to load climatic data from Engineers Calculations or select for projects location from a list";
             //btnOne.LongDescription = "";
 
             return Result.Succeeded;
