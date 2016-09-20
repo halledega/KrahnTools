@@ -23,6 +23,7 @@ namespace KrahnTools.PSDCreator
         string titleBlock = "Titleblock - 11 x 17_Krahn Engineering - PSD.rfa";
         string geometryViewTemplate = "PSD Geometry";
         string rebarViewTemplate = "PSD Reinforcement";
+        string panelNumber;
 
         static AddInId appId = new AddInId(new Guid("E5E1F080-0B67-4702-BE0D-1A847BE73A98"));
 
@@ -124,7 +125,15 @@ namespace KrahnTools.PSDCreator
                 View sectionView = CreateViewAndSectionMark(uidoc, e);
 
                 //get the mark parameter and set it to the panel number variable
-                string panelNumber = e.get_Parameter(BuiltInParameter.ALL_MODEL_MARK).AsString();
+                if(e.get_Parameter(BuiltInParameter.ALL_MODEL_MARK).AsString() == null)
+                {
+                    TaskDialog.Show("No Panel Number", "Selected Panel does not have a Type Mark (Panel Number).\nPlease ensure all panels are numbered prior to creating PSD views.");
+                    return Result.Succeeded;
+                }
+                else
+                {
+                    panelNumber = e.get_Parameter(BuiltInParameter.ALL_MODEL_MARK).AsString();
+                }
 
                 //duplicate the active view using the the DuplicateViewEmbeds Function created below
                 View Embedview = SetupViewEmbeds(doc, panelNumber, sectionView);

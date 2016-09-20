@@ -104,9 +104,9 @@
             this.rdo_nonStruct.AutoSize = true;
             this.rdo_nonStruct.Location = new System.Drawing.Point(7, 44);
             this.rdo_nonStruct.Name = "rdo_nonStruct";
-            this.rdo_nonStruct.Size = new System.Drawing.Size(93, 17);
+            this.rdo_nonStruct.Size = new System.Drawing.Size(117, 17);
             this.rdo_nonStruct.TabIndex = 1;
-            this.rdo_nonStruct.Text = "Non-Structural";
+            this.rdo_nonStruct.Text = "Exterior Finish Face";
             this.rdo_nonStruct.UseVisualStyleBackColor = true;
             this.rdo_nonStruct.CheckedChanged += new System.EventHandler(this.rdo_nonStruct_CheckedChanged);
             // 
@@ -116,10 +116,10 @@
             this.rdo_Struct.Checked = true;
             this.rdo_Struct.Location = new System.Drawing.Point(7, 20);
             this.rdo_Struct.Name = "rdo_Struct";
-            this.rdo_Struct.Size = new System.Drawing.Size(70, 17);
+            this.rdo_Struct.Size = new System.Drawing.Size(114, 17);
             this.rdo_Struct.TabIndex = 0;
             this.rdo_Struct.TabStop = true;
-            this.rdo_Struct.Text = "Structural";
+            this.rdo_Struct.Text = "Interior Finish Face";
             this.rdo_Struct.UseVisualStyleBackColor = true;
             this.rdo_Struct.CheckedChanged += new System.EventHandler(this.rdo_Struct_CheckedChanged);
             // 
