@@ -20,7 +20,9 @@ namespace KrahnTools.PSDCreator
     public class CreatePSD : IExternalCommand
     {
         public bool StructSelected;
-
+        string titleBlock = "Titleblock - 11 x 17_Krahn Engineering - PSD.rfa";
+        string geometryViewTemplate = "PSD Geometry";
+        string rebarViewTemplate = "PSD Reinforcement";
 
         static AddInId appId = new AddInId(new Guid("E5E1F080-0B67-4702-BE0D-1A847BE73A98"));
 
@@ -58,8 +60,10 @@ namespace KrahnTools.PSDCreator
 
             //check to see if the PSD titleblock is in the current document.
             FilteredElementCollector titleblockCollector = new FilteredElementCollector(doc).OfClass(typeof(Family));
-            Family family = titleblockCollector.FirstOrDefault<Element>(e => e.Name.Equals("Titleblock - 11 x 17_Krahn Engineering - PSD")) as Family;
-            string FamilyPath = @"C:\ProgramData\Autodesk\Revit\Addins\2016\PSDCreator\Titleblock - 11 x 17_Krahn Engineering - PSD.rfa";
+            Family family = titleblockCollector.FirstOrDefault<Element>(e => e.Name.Equals(titleBlock)) as Family;
+            string FamilyPath = @"C:\ProgramData\Autodesk\Revit\Addins\2016\KrahnTools\PSDCreator\" + titleBlock;
+
+            
 
             //if the titleblock doesn't exist in the current document, it is imported.
             if (null == family)
@@ -81,8 +85,8 @@ namespace KrahnTools.PSDCreator
 
             //makes sure the correct view templates have been created in the project.
             FilteredElementCollector viewTemplateCollector = new FilteredElementCollector(doc).OfClass(typeof(View));
-            View embedtitleblock = viewTemplateCollector.FirstOrDefault<Element>(e => e.Name.Equals("PSD_EMBEDS")) as View;
-            View rebartitleblock = viewTemplateCollector.FirstOrDefault<Element>(e => e.Name.Equals("PSD_REBAR")) as View;
+            View embedtitleblock = viewTemplateCollector.FirstOrDefault<Element>(e => e.Name.Equals(geometryViewTemplate)) as View;
+            View rebartitleblock = viewTemplateCollector.FirstOrDefault<Element>(e => e.Name.Equals(rebarViewTemplate)) as View;
 
             //if they don't exist in the project, warning is shown and application is terminated
             if ((embedtitleblock == null || rebartitleblock == null))
@@ -225,7 +229,7 @@ namespace KrahnTools.PSDCreator
                 View viewTemplate = (from v in new FilteredElementCollector(doc)
                                      .OfClass(typeof(View))
                                      .Cast<View>()
-                                     where v.IsTemplate == true && v.Name == "PSD_EMBEDS"
+                                     where v.IsTemplate == true && v.Name == geometryViewTemplate
                                      select v)
                                      .First();
                 view.ViewTemplateId = viewTemplate.Id;
@@ -262,7 +266,7 @@ namespace KrahnTools.PSDCreator
                 View viewTemplate = (from v in new FilteredElementCollector(doc)
                                      .OfClass(typeof(View))
                                      .Cast<View>()
-                                     where v.IsTemplate == true && v.Name == "PSD_REBAR"
+                                     where v.IsTemplate == true && v.Name == rebarViewTemplate
                                      select v)
                                      .First();
                 view.ViewTemplateId = viewTemplate.Id;

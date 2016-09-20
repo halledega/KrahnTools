@@ -26,7 +26,7 @@ namespace KrahnTools
 
             RibbonPanel panelA = application.CreateRibbonPanel(myRibbon, "PSD Tools");
             RibbonPanel panelB = application.CreateRibbonPanel(myRibbon, "Text Tools");
-            RibbonPanel panelC = application.CreateRibbonPanel(myRibbon, "Text Tools");
+            RibbonPanel panelC = application.CreateRibbonPanel(myRibbon, "Climatic Data");
 
             // Standard buttons
 
