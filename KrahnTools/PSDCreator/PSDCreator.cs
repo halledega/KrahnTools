@@ -105,6 +105,7 @@ namespace KrahnTools.PSDCreator
                 {
                     //Prompts the user to select a wall (and only a wall) using the MySelectionFilter Class created below
                     myRef = uidoc.Selection.PickObject(ObjectType.Element, new MySelectionFilter("Walls"), "Select a wall");
+                    //myRef = uidoc.Selection.PickObject(ObjectType.Face, new MySelectionFilter("Walls"), "Select a Wall");
                 }
                 catch (Autodesk.Revit.Exceptions.OperationCanceledException)
                 {
@@ -128,7 +129,7 @@ namespace KrahnTools.PSDCreator
                 if(e.get_Parameter(BuiltInParameter.ALL_MODEL_MARK).AsString() == null)
                 {
                     TaskDialog.Show("No Panel Number", "Selected Panel does not have a Type Mark (Panel Number).\nPlease ensure all panels are numbered prior to creating PSD views.");
-                    return Result.Succeeded;
+                    return Result.Failed;
                 }
                 else
                 {
@@ -203,27 +204,29 @@ namespace KrahnTools.PSDCreator
                     t.Commit();
                 }
 
-                //try
-                //{
-                TagElement(uidoc, myRef, Embedview);
-                //creates a new PSD sheet
-                ViewSheet PSDsheet = CreatePSDSheet(doc, panelNumber);
-                //place view on PSDsheet
-                PlaceOnSheet(doc, PSDsheet, Embedview);
-                //creates rebar view
-                View rebarView = DuplicateViewRebar(doc, panelNumber, Embedview);
-                //place rebar view on PSDsheet
-                PlaceOnSheet(doc, PSDsheet, rebarView);
-                //}
-                //catch
-                //{
-                //    TaskDialog.Show("Error", "Revit Encountered an Error. Sheet probably already exists.");
-                //    return Result.Failed;
-                //}
+                try
+                {
+                    TagElement(uidoc, myRef, Embedview);
+                    //creates a new PSD sheet
+                    ViewSheet PSDsheet = CreatePSDSheet(doc, panelNumber);
+                    //place view on PSDsheet
+                    PlaceOnSheet(doc, PSDsheet, Embedview);
+                    //creates rebar view
+                    View rebarView = DuplicateViewRebar(doc, panelNumber, Embedview);
+                    //place rebar view on PSDsheet
+                    PlaceOnSheet(doc, PSDsheet, rebarView);
+                    //display a message ox indicating success
+                    TaskDialog.Show("PSD Created", "PSD for Panel: " + panelNumber +  "created sucessfully.\nSelect another panel or hti escape to quit.");
+                }
+                catch
+            {
+                TaskDialog.Show("Error", "Revit Encountered an Error. Sheet probably already exists.");
+                return Result.Failed;
             }
-
-
         }
+           
+
+        }//end Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
 
         private View SetupViewEmbeds(Document doc, string pnum, View view)
         {

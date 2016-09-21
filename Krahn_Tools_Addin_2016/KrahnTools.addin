@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>ribbonUI</Name>
+    <Assembly>C:\ProgramData\Autodesk\Revit\Addins\2016\KrahnTools\KrahnTools.dll</Assembly>
+    <AddInId>E5E1F080-0B67-4702-BE0D-1A847BE73A98</AddInId>
+    <FullClassName>KrahnTools.ribbonUI</FullClassName>
+    <VendorId>LDCJ</VendorId>
+  </AddIn>
+</RevitAddIns>
