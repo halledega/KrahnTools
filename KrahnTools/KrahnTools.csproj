@@ -60,7 +60,8 @@
     <Compile Include="ClimaticData\ClimaticData_form.Designer.cs">
       <DependentUpon>ClimaticData_form.cs</DependentUpon>
     </Compile>
-    <Compile Include="PSDCreator\HelperClass.cs" />
+    <Compile Include="PSDCreator\Creator.cs" />
+    <Compile Include="PSDCreator\Helper.cs" />
     <Compile Include="KrahnTools.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PSDCreator\PSDCreator.cs" />
@@ -70,6 +71,7 @@
     <Compile Include="PSDCreator\UserInputForm.Designer.cs">
       <DependentUpon>UserInputForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="PSDCreator\Util.cs" />
     <Compile Include="SpecialCharacters\SpecialCharacters.cs" />
     <Compile Include="SpecialCharacters\SpecialCharacters_form.cs">
       <SubType>Form</SubType>
@@ -77,6 +79,7 @@
     <Compile Include="SpecialCharacters\SpecialCharacters_form.Designer.cs">
       <DependentUpon>SpecialCharacters_form.cs</DependentUpon>
     </Compile>
+    <Compile Include="Testing\Testing.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ClimaticData\ClimaticData_form.resx">

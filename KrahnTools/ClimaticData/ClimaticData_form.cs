@@ -8,13 +8,16 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace KrahnTools.ClimaticData
+namespace KrahnTools
 {
-    public partial class ClimaticData_form : Form
+    namespace ClimaticData
     {
-        public ClimaticData_form()
+        public partial class ClimaticData_form : Form
         {
-            InitializeComponent();
+            public ClimaticData_form()
+            {
+                InitializeComponent();
+            }
         }
     }
 }

@@ -27,6 +27,7 @@ namespace KrahnTools
             RibbonPanel panelA = application.CreateRibbonPanel(myRibbon, "PSD Tools");
             RibbonPanel panelB = application.CreateRibbonPanel(myRibbon, "Text Tools");
             RibbonPanel panelC = application.CreateRibbonPanel(myRibbon, "Climatic Data");
+            RibbonPanel panelD = application.CreateRibbonPanel(myRibbon, "Testing Panel");
 
             // Standard buttons
 
@@ -46,12 +47,20 @@ namespace KrahnTools
             btnBOne.ToolTip = "Copies special charecters (Alt-Codes) to clip board to be pastes into text block";
             //btnOne.LongDescription = "";
 
-            PushButton btnCOne = (PushButton)panelB.AddItem(new PushButtonData("Get Climatic Data", "ClimaticData", dll, "KrahnTools.ClimaticData.ClimaticData"));
+            PushButton btnCOne = (PushButton)panelC.AddItem(new PushButtonData("Get Climatic Data", "ClimaticData", dll, "KrahnTools.ClimaticData.ClimaticData"));
             // need reference to PresentationCore to get access to the System.Windows.Media.Imaging namespace which includes BitmapImage
             btnCOne.LargeImage = new BitmapImage(new Uri(Path.Combine(folderPath, "imgs/diameter_16.png"), UriKind.Absolute));
             btnCOne.Image = new BitmapImage(new Uri(Path.Combine(folderPath, "imgs/diameter_16.png"), UriKind.Absolute));
             //btnBOne.ToolTipImage = new BitmapImage(new Uri(Path.Combine(folderPath, "imgs/diameter_32.png"), UriKind.Absolute));
             btnCOne.ToolTip = "Allows users to load climatic data from Engineers Calculations or select for projects location from a list";
+            //btnOne.LongDescription = "";
+
+            PushButton btnDOne = (PushButton)panelD.AddItem(new PushButtonData("Test", "Test", dll, "KrahnTools.Testing.Testing"));
+            // need reference to PresentationCore to get access to the System.Windows.Media.Imaging namespace which includes BitmapImage
+            btnDOne.LargeImage = new BitmapImage(new Uri(Path.Combine(folderPath, "imgs/KrahnLogo32.png"), UriKind.Absolute));
+            btnDOne.Image = new BitmapImage(new Uri(Path.Combine(folderPath, "imgs/KrahnLogo16.png"), UriKind.Absolute));
+            btnDOne.ToolTipImage = new BitmapImage(new Uri(Path.Combine(folderPath, "imgs/Panel.png"), UriKind.Absolute));
+            btnDOne.ToolTip = "Click this button to create panel shop drawings";
             //btnOne.LongDescription = "";
 
             return Result.Succeeded;
